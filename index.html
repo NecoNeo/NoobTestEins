@@ -8,13 +8,15 @@
 </head>
 <body>
   <div>
-    <input id="text" type="text" />
+    <input id="text" type="text" value="(1+23)*24.2+3.75/2" />
     <button id="set" onclick="set()">set</button>
-    <button id="check">check</button>
+    <button id="check" onclick="check()">check</button>
   </div>
   <div id="disp1"></div>
+  <div style="clear:both"></div>
   <div id="disp2"></div>
   <script type="text/javascript">
+  var myExp = null;
 
   function set () {
     var text = document.getElementById('text');
@@ -29,6 +31,12 @@
 
     var postfixExp = new Queue();
     var disp2 = document.getElementById('disp2');
+  }
+
+  function check(){
+    var text = document.getElementById('text');
+    var input = text.value;
+    myExp = new ExpObject(input);
   }
 
   </script>

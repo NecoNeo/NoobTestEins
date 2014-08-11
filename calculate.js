@@ -9,22 +9,22 @@
   };
 */
 
-var ExpTreeNode = function (element) {
+var TreeNode = function (element) {
   this.element = element;
   this.leftChild = null;
   this.rightChild = null;
 };
 
-ExpTreeNode.prototype = {
-  //constructor: ExpTreeNode,
+TreeNode.prototype = {
+  //constructor: TreeNode,
   makeEmpty: function () {},
 
-  setLeftChild: function (expTreeNode) {
-    this.leftChild = expTreeNode;
+  setLeftChild: function (treeNode) {
+    this.leftChild = treeNode;
   },
 
-  setRightChild: function (expTreeNode) {
-    this.rightChild = expTreeNode;
+  setRightChild: function (treeNode) {
+    this.rightChild = treeNode;
   }
 };
 
@@ -88,9 +88,9 @@ Queue._Element = function (element, next) {
 
 Queue.prototype = {
 
-  makeEmpty: function(){},
+  makeEmpty: function() {},
 
-  enqueue: function(element){
+  enqueue: function(element) {
     if (this.size == 0) {
       this.front = new Queue._Element(element, null);
       this.rear = this.front;
@@ -103,7 +103,7 @@ Queue.prototype = {
     }
   },
 
-  dequeue: function(){
+  dequeue: function() {
     if (this.size == 0) {
       return null;
     } else if (this.size == 1) {
@@ -120,7 +120,7 @@ Queue.prototype = {
     }
   },
 
-  display: function(){
+  display: function() {
     if (this.size == 0) 
       return "Empty Queue!"
     var temp = this.front;
@@ -134,12 +134,67 @@ Queue.prototype = {
 
 };
 
-
 //***************************************************
 
-var ExpNodeElement = function(type, value){
+var ExpObject = function(input) {
+  this.input = input;
+  this.originExp = null;
+  this.postfixExp = null;
+  this.expTree = null;
+  this._init();
+};
+
+ExpObject._ExpNodeElement = function(type, value) {
   this.nodeType = type;
   this.nodeValue = value;
 }
 
+ExpObject._ExpNodeElement.prototype.toString = function() {
+  return this.nodeValue;
+}
 
+ExpObject.prototype = {
+
+  value: null,
+  isCalculated: false,
+  initialized: false,
+
+  _init: function() {},
+
+  _reader: function(chars) {
+    var type;
+    if (typeof chars == 'number') {
+      type = 'number';
+    } else {
+      type = chars;
+    }
+    return new ExpObject._ExpNodeElement(type, chars);
+  },
+
+  _dispExp: function(exp) {
+    var disp1 = document.getElementById('disp1');
+    disp1.innerHTML = exp.display();
+  },
+
+  createOriginExp: function() {
+    this.originExp = new Queue();
+    var pattern = /(?=\s*)((\d+(\.\d*)?)|([\+\-\*\/\(\)]))(?=\s*)/g
+    while ((scan = pattern.exec(this.input)) != null) {
+      var expNode = this._reader(scan[0]);
+      this.originExp.enqueue(expNode);
+    }
+
+    if (this.originExp.size == 0) {
+      console.log("ExpObject: Empty input.");
+    } else {
+      console.log("ExpObject: OriginExp parsed.");
+    }
+  },
+
+  createPostfixExp: function() {},
+
+  createExpTree: function() {},
+
+  calculate: function() {}
+
+};
