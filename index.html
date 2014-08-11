@@ -13,17 +13,24 @@
     <button id="check">check</button>
   </div>
   <div id="disp1"></div>
+  <div id="disp2"></div>
   <script type="text/javascript">
+
   function set () {
     var text = document.getElementById('text');
     var input = text.value;
-    var myStack = new Stack();
+    var originExp = new Queue();
     for (var i = 0; i < input.length; i++) {
-      myStack.push(input.substr(i,1));
+      originExp.enqueue(input.substr(i,1));
     }
+
     var disp1 = document.getElementById('disp1');
-    disp1.innerHTML = myStack._display();
+    disp1.innerHTML = originExp.display();
+
+    var postfixExp = new Queue();
+    var disp2 = document.getElementById('disp2');
   }
+
   </script>
 </body>
 </html>
