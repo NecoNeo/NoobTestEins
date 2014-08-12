@@ -67,6 +67,7 @@ Stack.prototype = {
     var output = " ";
     for (var i = 0; i < this.size; i++) {
       output = '<div style="border: solid 1px #000000; float: left">' + temp.element + '</div>' + output;
+      console.log(temp.element);
       temp = temp.next;
     }
     return output;
@@ -127,6 +128,7 @@ Queue.prototype = {
     var output = " ";
     for (var i = 0; i < this.size; i++) {
       output = output + '<div style="border: solid 1px #000000; float: left">' + temp.element + '</div>';
+      console.log(temp.element);
       temp = temp.next;
     }
     return output;
@@ -136,11 +138,44 @@ Queue.prototype = {
 
 //***************************************************
 
+var ExpQueue = function() {
+  Queue.call(this);
+  this.index = null;
+}
+
+ExpQueue.prototype = new Queue();
+
+ExpQueue.prototype.reset = function() {
+  this.index = this.front;
+  console.log('ExpQueue: Reset.');
+};
+
+ExpQueue.prototype.exec = function() {
+  var temp = this.index;
+  if (temp == null) {
+    this.reset();
+    return null;
+  } else {
+    this.index = temp.next;
+    console.log(temp.element);
+    return temp.element;
+  }
+};
+
+//***************************************************
+
 var ExpObject = function(input) {
   this.input = input;
   this.originExp = null;
   this.postfixExp = null;
   this.expTree = null;
+  this.value = null;
+
+  this.status = {
+    isCalculated: false,
+    initialized: false,
+  };
+
   this._init();
 };
 
@@ -153,33 +188,49 @@ ExpObject._ExpNodeElement.prototype.toString = function() {
   return this.nodeValue;
 }
 
-ExpObject.prototype = {
+ExpObject.RE = {
+  validate: /^(?:\s*((?:\d+(?:\.\d*)?)|(?:[\+\-\*\/\(\)])))*\s*$/g,
+  pattern: /(?=\s*)((\d+(\.\d*)?)|([\+\-\*\/\(\)]))(?=\s*)/g,
+  number: /\d+(?:\.\d*)?/g
+};
 
-  value: null,
-  isCalculated: false,
-  initialized: false,
+ExpObject.prototype = {
 
   _init: function() {},
 
   _reader: function(chars) {
     var type;
-    if (typeof chars == 'number') {
+    if (ExpObject.RE.number.test(chars) == true) {
       type = 'number';
+    } else if (chars == '+' || chars == '-') {
+      type = 'plus';
+    } else if (chars == '*' || chars == '/') {
+      type = 'mult';
+    } else if (chars == '(') {
+      type = 'leftBracket';
+    } else if (chars == ')') {
+      type = 'rightBracket';
     } else {
-      type = chars;
+      type = chars;     // this one leads to error;
     }
+    ExpObject.RE.number.lastIndex = 0;
     return new ExpObject._ExpNodeElement(type, chars);
   },
 
-  _dispExp: function(exp) {
-    var disp1 = document.getElementById('disp1');
-    disp1.innerHTML = exp.display();
+  _dispExp: function(exp, div) {
+    div.innerHTML = exp.display();
   },
 
   createOriginExp: function() {
-    this.originExp = new Queue();
-    var pattern = /(?=\s*)((\d+(\.\d*)?)|([\+\-\*\/\(\)]))(?=\s*)/g
-    while ((scan = pattern.exec(this.input)) != null) {
+    this.originExp = new ExpQueue();
+    var validate = ExpObject.RE.validate.test(this.input);
+    ExpObject.RE.validate.lastIndex = 0;
+
+    if (validate == false) {
+      throw new Error('ExpObject: Invalid input.');
+    }
+    
+    while ((scan = ExpObject.RE.pattern.exec(this.input)) != null) {
       var expNode = this._reader(scan[0]);
       this.originExp.enqueue(expNode);
     }
@@ -189,9 +240,78 @@ ExpObject.prototype = {
     } else {
       console.log("ExpObject: OriginExp parsed.");
     }
+
+    this.originExp.reset();
   },
 
-  createPostfixExp: function() {},
+  createPostfixExp: function() {
+    this.postfixExp = new ExpQueue();
+    var tempStack = new Stack();
+    var temp;
+
+    while ((temp = this.originExp.exec()) != null) {
+      switch (temp.nodeType) {
+        case "number":
+          this.postfixExp.enqueue(temp);
+          break;
+        case "plus":
+          if (tempStack.top == null) {
+            tempStack.push(temp);
+          } else if (tempStack.top.nodeType == "leftBracket") {
+            tempStack.push(temp);
+          } else if (tempStack.top.nodeType == "plus" || tempStack.top.nodeType == "mult") {
+            do {
+              var popped = tempStack.pop();
+              this.postfixExp.enqueue(popped);
+            } while (tempStack.top.nodeType == "plus" || tempStack.top.nodeType == "mult");
+            tempStack.push(temp);
+          }
+          break;
+        case "mult":
+          if (tempStack.top == null) {
+            tempStack.push(temp);
+          } else if (tempStack.top.nodeType == "leftBracket") {
+            tempStack.push(temp);
+          } else if (tempStack.top.nodeType == "plus") {
+            tempStack.push(temp);
+          } else if (tempStack.top.nodeType == "mult") {
+            do {
+              var popped = tempStack.pop();
+              this.postfixExp.enqueue(popped);
+            } while (tempStack.top.nodeType == "mult");
+            tempStack.push(temp);
+          }
+          break;
+        case "leftBracket":
+          tempStack.push(temp);
+          break;
+        case "rightBracket":
+          while (tempStack.top != null && tempStack.top.nodeType != "leftBracket") {
+            var popped = tempStack.pop();
+            this.postfixExp.enqueue(popped);
+          }
+          if (tempStack.top == null) {
+            throw new Error('ExpObject: Illegal right bracket.');
+          }
+          if (tempStack.top.nodeType == "leftBracket") {
+            tempStack.pop();
+          }
+          break;
+        default:
+          throw new Error('ExpObject: Unknown Error!');
+      }
+    }
+
+    while (tempStack.top != null) {
+      if (tempStack.top.nodeType == "leftBracket") {
+        throw new Error('ExpObject: Bracket not correctly closed!');
+      }
+      var popped = tempStack.pop();
+      this.postfixExp.enqueue(popped);
+    }
+
+    this.postfixExp.reset();
+  },
 
   createExpTree: function() {},
 
