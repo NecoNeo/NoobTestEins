@@ -257,28 +257,28 @@ ExpObject.prototype = {
         case "plus":
           if (tempStack.top == null) {
             tempStack.push(temp);
-          } else if (tempStack.top.nodeType == "leftBracket") {
+          } else if (tempStack.top.element.nodeType == "leftBracket") {
             tempStack.push(temp);
-          } else if (tempStack.top.nodeType == "plus" || tempStack.top.nodeType == "mult") {
+          } else if (tempStack.top.element.nodeType == "plus" || tempStack.top.element.nodeType == "mult") {
             do {
               var popped = tempStack.pop();
               this.postfixExp.enqueue(popped);
-            } while (tempStack.top.nodeType == "plus" || tempStack.top.nodeType == "mult");
+            } while (tempStack.top != null && (tempStack.top.element.nodeType == "plus" || tempStack.top.element.nodeType == "mult"));
             tempStack.push(temp);
           }
           break;
         case "mult":
           if (tempStack.top == null) {
             tempStack.push(temp);
-          } else if (tempStack.top.nodeType == "leftBracket") {
+          } else if (tempStack.top.element.nodeType == "leftBracket") {
             tempStack.push(temp);
-          } else if (tempStack.top.nodeType == "plus") {
+          } else if (tempStack.top.element.nodeType == "plus") {
             tempStack.push(temp);
-          } else if (tempStack.top.nodeType == "mult") {
+          } else if (tempStack.top.element.nodeType == "mult") {
             do {
               var popped = tempStack.pop();
               this.postfixExp.enqueue(popped);
-            } while (tempStack.top.nodeType == "mult");
+            } while (tempStack.top != null && tempStack.top.element.nodeType == "mult");
             tempStack.push(temp);
           }
           break;
@@ -286,14 +286,14 @@ ExpObject.prototype = {
           tempStack.push(temp);
           break;
         case "rightBracket":
-          while (tempStack.top != null && tempStack.top.nodeType != "leftBracket") {
+          while (tempStack.top != null && tempStack.top.element.nodeType != "leftBracket") {
             var popped = tempStack.pop();
             this.postfixExp.enqueue(popped);
           }
           if (tempStack.top == null) {
             throw new Error('ExpObject: Illegal right bracket.');
           }
-          if (tempStack.top.nodeType == "leftBracket") {
+          if (tempStack.top.element.nodeType == "leftBracket") {
             tempStack.pop();
           }
           break;
@@ -303,7 +303,7 @@ ExpObject.prototype = {
     }
 
     while (tempStack.top != null) {
-      if (tempStack.top.nodeType == "leftBracket") {
+      if (tempStack.top.element.nodeType == "leftBracket") {
         throw new Error('ExpObject: Bracket not correctly closed!');
       }
       var popped = tempStack.pop();
