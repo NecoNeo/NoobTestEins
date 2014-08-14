@@ -25,7 +25,9 @@ TreeNode.prototype = {
 
   setRightChild: function (treeNode) {
     this.rightChild = treeNode;
-  }
+  },
+
+  draw: function(){}
 };
 
 //***************************************************
@@ -157,7 +159,7 @@ ExpQueue.prototype.exec = function() {
     return null;
   } else {
     this.index = temp.next;
-    console.log(temp.element);
+    //console.log(temp.element);
     return temp.element;
   }
 };
@@ -221,7 +223,7 @@ ExpObject.prototype = {
     div.innerHTML = exp.display();
   },
 
-  createOriginExp: function() {
+  _createOriginExp: function() {
     this.originExp = new ExpQueue();
     var validate = ExpObject.RE.validate.test(this.input);
     ExpObject.RE.validate.lastIndex = 0;
@@ -244,7 +246,7 @@ ExpObject.prototype = {
     this.originExp.reset();
   },
 
-  createPostfixExp: function() {
+  _createPostfixExp: function() {
     this.postfixExp = new ExpQueue();
     var tempStack = new Stack();
     var temp;
@@ -310,10 +312,34 @@ ExpObject.prototype = {
       this.postfixExp.enqueue(popped);
     }
 
+    console.log("ExpObject: postfixExp parsed.");
     this.postfixExp.reset();
   },
 
-  createExpTree: function() {},
+  _createExpTree: function() {
+    this.expTree = null;
+    var tempStack = new Stack();
+    var temp;
+
+    while ((temp = this.postfixExp.exec()) != null) {
+      var tempNode = new TreeNode(temp);
+      if (temp.nodeType == "number") {
+        tempStack.push(tempNode);
+      } else {
+        if (tempStack.size < 2) {
+          throw new Error('Invalid Exp cannot be parsed.');
+        }
+        tempNode.setRightChild(tempStack.pop());
+        tempNode.setLeftChild(tempStack.pop());
+        tempStack.push(tempNode);
+      }
+    }
+    if (tempStack.size != 1) {
+      throw new Error('Invalid Exp cannot be parsed.');
+    }
+    this.expTree = tempStack.pop();
+    console.log('ExpObject: ExpTree parsed successfully.');
+  },
 
   calculate: function() {}
 

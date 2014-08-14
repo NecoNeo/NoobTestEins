@@ -16,6 +16,7 @@
   <div style="clear:both"></div>
   <div id="disp2"></div>
   <div style="clear:both"></div>
+  <div id="disp3"></div>
   <script type="text/javascript">
   var myExp = null;
 
@@ -40,10 +41,11 @@
     var disp1 = document.getElementById('disp1');
     var disp2 = document.getElementById('disp2');
     myExp = new ExpObject(input);
-    myExp.createOriginExp();
+    myExp._createOriginExp();
     myExp._dispExp(myExp.originExp, disp1);
-    myExp.createPostfixExp();
+    myExp._createPostfixExp();
     myExp._dispExp(myExp.postfixExp, disp2);
+    myExp._createExpTree();
   }
 
   </script>
