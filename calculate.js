@@ -368,17 +368,17 @@ ExpObject.prototype = {
 
   /**
      * Draw the expression tree on a canvas
-     * w: width of the canvas; k: length of the first path;
+     * w: width of the canvas; h: height per level;
      * fs: font size; r: radius of a node circle;
      *
      * @method draw
      * @param {Number} w
-     * @param {Number} k
+     * @param {Number} h
      * @param {Number} fz
      * @param {Number} r
      * @return {Canvas Element}
      */
-  draw: function(w, k, fs, r) {
+  draw: function(w, h, fs, r) {
 
     var canvas = document.createElement('canvas'); 
     canvas.width = w;
@@ -401,10 +401,13 @@ ExpObject.prototype = {
       currentQueue.enqueue(this.expTree);
       n++;
     }
+    var alpha = Math.PI / 18;
+    var k = h / Math.tan(alpha);
     var x0 = w / 2;
     var x = x0;
     var y = r;
     var p;
+    var l = 0;
 
     while (currentQueue.size != 0 && n > 0) {
       nextQueue = new Queue();
@@ -422,21 +425,25 @@ ExpObject.prototype = {
           c.fillText(word, x, y + r / 3);
           c.beginPath();
           c.arc(x, y, r, 0, 2 * Math.PI, true);
-          c.moveTo(x + p * (r / 2),y - Math.sqrt(3) * r / 2);
-          c.lineTo(x + p * (k - r / 2),y - Math.sqrt(3) * (k - r / 2));
+          if (l) {
+            c.moveTo(x + p * r * Math.cos(alpha), y - r * Math.sin(alpha));
+            c.lineTo(x + p * (k - r * Math.cos(alpha)), y - h + r * Math.sin(alpha));
+          }
           c.stroke();
         } else {
           nextQueue.enqueue(null);
           nextQueue.enqueue(null);
         }
-        x += 2 * k;
+        x += (2 * k);
         p *= (-1);
       }
       currentQueue = nextQueue;
       k /= 2;
-      x0 = x0 - k;
+      x0 -= k;
       x = x0;
-      y += (Math.sqrt(3) * k);
+      y += h;
+      l++;
+      alpha = Math.atan(2 * Math.tan(alpha));
     }
 
     return canvas;
