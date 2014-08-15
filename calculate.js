@@ -27,7 +27,7 @@ TreeNode.prototype = {
     this.rightChild = treeNode;
   },
 
-  draw: function(){}
+  draw: function(div, radius){}
 };
 
 //***************************************************
@@ -198,12 +198,18 @@ ExpObject.RE = {
 
 ExpObject.prototype = {
 
-  _init: function() {},
+  _init: function() {
+    this._createOriginExp();
+    this._createPostfixExp();
+    this._createExpTree();
+    this.value = this.calculate();
+  },
 
   _reader: function(chars) {
     var type;
     if (ExpObject.RE.number.test(chars) == true) {
       type = 'number';
+      chars = Number(chars);
     } else if (chars == '+' || chars == '-') {
       type = 'plus';
     } else if (chars == '*' || chars == '/') {
@@ -341,6 +347,23 @@ ExpObject.prototype = {
     console.log('ExpObject: ExpTree parsed successfully.');
   },
 
-  calculate: function() {}
+  calculate: function() {
+    traversal = function(treeNode) {
+      if (treeNode.element.nodeType == "number") {
+        return treeNode.element.nodeValue;
+      } else if (treeNode.element.nodeValue == "+") {
+        return ((traversal(treeNode.leftChild)) + (traversal(treeNode.rightChild)));
+      } else if (treeNode.element.nodeValue == "-") {
+        return (traversal(treeNode.leftChild) - traversal(treeNode.rightChild));
+      } else if (treeNode.element.nodeValue == "*") {
+        return (traversal(treeNode.leftChild) * traversal(treeNode.rightChild));
+      } else if (treeNode.element.nodeValue == "/") {
+        return (traversal(treeNode.leftChild) / traversal(treeNode.rightChild));
+      } else {
+        throw new Error('ExpObject: Invalid ExpTree.');
+      }
+    };
+    return traversal(this.expTree);
+  }
 
 };

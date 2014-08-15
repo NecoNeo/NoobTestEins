@@ -17,6 +17,7 @@
   <div id="disp2"></div>
   <div style="clear:both"></div>
   <div id="disp3"></div>
+  <div id="disp4"></div>
   <script type="text/javascript">
   var myExp = null;
 
@@ -40,12 +41,12 @@
     var input = text.value;
     var disp1 = document.getElementById('disp1');
     var disp2 = document.getElementById('disp2');
+    var disp3 = document.getElementById('disp3');
+    var disp4 = document.getElementById('disp4');
     myExp = new ExpObject(input);
-    myExp._createOriginExp();
     myExp._dispExp(myExp.originExp, disp1);
-    myExp._createPostfixExp();
     myExp._dispExp(myExp.postfixExp, disp2);
-    myExp._createExpTree();
+    disp3.innerHTML = "=" + myExp.value;
   }
 
   </script>
