@@ -47,6 +47,8 @@
     myExp._dispExp(myExp.originExp, disp1);
     myExp._dispExp(myExp.postfixExp, disp2);
     disp3.innerHTML = "=" + myExp.value;
+    disp4.innerHTML = "";
+    disp4.appendChild(myExp.draw(1000, 400, 10, 15));
   }
 
   </script>

@@ -25,9 +25,7 @@ TreeNode.prototype = {
 
   setRightChild: function (treeNode) {
     this.rightChild = treeNode;
-  },
-
-  draw: function(div, radius){}
+  }
 };
 
 //***************************************************
@@ -348,6 +346,7 @@ ExpObject.prototype = {
   },
 
   calculate: function() {
+
     traversal = function(treeNode) {
       if (treeNode.element.nodeType == "number") {
         return treeNode.element.nodeValue;
@@ -363,7 +362,84 @@ ExpObject.prototype = {
         throw new Error('ExpObject: Invalid ExpTree.');
       }
     };
+
     return traversal(this.expTree);
+  },
+
+  /**
+     * Draw the expression tree on a canvas
+     * w: width of the canvas; k: length of the first path;
+     * fs: font size; r: radius of a node circle;
+     *
+     * @method draw
+     * @param {Number} w
+     * @param {Number} k
+     * @param {Number} fz
+     * @param {Number} r
+     * @return {Canvas Element}
+     */
+  draw: function(w, k, fs, r) {
+
+    var canvas = document.createElement('canvas'); 
+    canvas.width = w;
+    canvas.height = w;
+
+    var c = canvas.getContext('2d');
+
+    //style config
+    c.fillStyle = '#333';
+    c.strokeStyle = 'bold #333';
+    c.lineWidth = 1;
+    c.font = "bold " + fs + "pt Helvetica";
+    c.textAlign = "center";
+    //
+
+    var currentQueue = new Queue();
+    var nextQueue;
+    var n = 0;
+    if (this.expTree != null) {
+      currentQueue.enqueue(this.expTree);
+      n++;
+    }
+    var x0 = w / 2;
+    var x = x0;
+    var y = r;
+    var p;
+
+    while (currentQueue.size != 0 && n > 0) {
+      nextQueue = new Queue();
+      n = 0;
+      p = 1;
+      while (currentQueue.size != 0) {
+        var tempNode = currentQueue.dequeue();
+        if (tempNode != null) {
+          if (tempNode.leftChild != null) n++;
+          nextQueue.enqueue(tempNode.leftChild);
+          if (tempNode.rightChild != null) n++;
+          nextQueue.enqueue(tempNode.rightChild);
+
+          var word = tempNode.element.toString();
+          c.fillText(word, x, y + r / 3);
+          c.beginPath();
+          c.arc(x, y, r, 0, 2 * Math.PI, true);
+          c.moveTo(x + p * (r / 2),y - Math.sqrt(3) * r / 2);
+          c.lineTo(x + p * (k - r / 2),y - Math.sqrt(3) * (k - r / 2));
+          c.stroke();
+        } else {
+          nextQueue.enqueue(null);
+          nextQueue.enqueue(null);
+        }
+        x += 2 * k;
+        p *= (-1);
+      }
+      currentQueue = nextQueue;
+      k /= 2;
+      x0 = x0 - k;
+      x = x0;
+      y += (Math.sqrt(3) * k);
+    }
+
+    return canvas;
   }
 
 };
