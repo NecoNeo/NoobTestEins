@@ -386,13 +386,8 @@ ExpObject.prototype = {
 
     var c = canvas.getContext('2d');
 
-    //style config
-    c.fillStyle = '#333';
-    c.strokeStyle = 'bold #333';
-    c.lineWidth = 1;
     c.font = "bold " + fs + "pt Helvetica";
     c.textAlign = "center";
-    //
 
     var currentQueue = new Queue();
     var nextQueue;
@@ -405,7 +400,7 @@ ExpObject.prototype = {
     var k = h / Math.tan(alpha);
     var x0 = w / 2;
     var x = x0;
-    var y = r;
+    var y = r + 5;
     var p;
     var l = 0;
 
@@ -421,15 +416,32 @@ ExpObject.prototype = {
           if (tempNode.rightChild != null) n++;
           nextQueue.enqueue(tempNode.rightChild);
 
+          c.beginPath();
+          c.strokeStyle = '#353';
+          c.fillStyle = '#353';
+          c.lineWidth = 3;
+          c.arc(x, y, r, 0, 2 * Math.PI, true);
+          if (tempNode.element.nodeType == 'number') {
+            c.stroke();
+          } else {
+            c.fill();
+          }
+          c.beginPath();
+          if (tempNode.element.nodeType == 'number') {
+            c.fillStyle = '#333';
+          } else {
+            c.fillStyle = '#FFF';
+          }
           var word = tempNode.element.toString();
           c.fillText(word, x, y + r / 3);
-          c.beginPath();
-          c.arc(x, y, r, 0, 2 * Math.PI, true);
           if (l) {
+            c.beginPath();
+            c.strokeStyle = '#333';
+            c.lineWidth = 2;
             c.moveTo(x + p * r * Math.cos(alpha), y - r * Math.sin(alpha));
             c.lineTo(x + p * (k - r * Math.cos(alpha)), y - h + r * Math.sin(alpha));
+            c.stroke();
           }
-          c.stroke();
         } else {
           nextQueue.enqueue(null);
           nextQueue.enqueue(null);
