@@ -67,7 +67,7 @@ Stack.prototype = {
     var output = " ";
     for (var i = 0; i < this.size; i++) {
       output = '<div style="border: solid 1px #000000; float: left">' + temp.element + '</div>' + output;
-      console.log(temp.element);
+      //console.log(temp.element);
       temp = temp.next;
     }
     return output;
@@ -128,7 +128,7 @@ Queue.prototype = {
     var output = " ";
     for (var i = 0; i < this.size; i++) {
       output = output + '<div style="border: solid 1px #000000; float: left">' + temp.element + '</div>';
-      console.log(temp.element);
+      //console.log(temp.element);
       temp = temp.next;
     }
     return output;
